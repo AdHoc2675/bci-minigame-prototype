@@ -12,7 +12,6 @@ public class JudgeDecider : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        MouceArea = GameObject.Find("Outer").GetComponent<Collider2D>();
         GreatArea = transform.GetChild(0).GetComponent<Collider2D>();
         GoodArea = transform.GetChild(1).GetComponent<Collider2D>();
         PoorArea = transform.GetChild(2).GetComponent<Collider2D>();
