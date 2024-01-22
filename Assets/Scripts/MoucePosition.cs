@@ -22,8 +22,10 @@ public class MoucePosition : MonoBehaviour
 
     public int Combo = 0;
     public int Score = 0;
+    public int ScoreAdder = 0;
     public Text ComboText;
     public Text ScoreText;
+    public Text ScoreAdderText;
 
     public int maxEnergy = 100;
     public int currentEnergy;
@@ -117,6 +119,7 @@ public class MoucePosition : MonoBehaviour
         energyBar.localScale = new Vector3((currentEnergy / (maxEnergy * 1.0f)), 1, 1);
         energyText.text = "X " + currentEnergy.ToString() + "%";
 
+
         float temp = ((currentEnergy / (maxEnergy * 1.0f)) * 4.0f);
 
         if (temp <= 1.0f)
@@ -172,6 +175,7 @@ public class MoucePosition : MonoBehaviour
                 {
                     
                     Debug.Log("Great");
+                    ScoreAdder = ((int)(1.0f * currentEnergy));
                     Combo++;
                     Score = (int)(Score + (1.0f * currentEnergy));
                     Instantiate(GreatJudgeText, transform);
@@ -179,6 +183,7 @@ public class MoucePosition : MonoBehaviour
                 else if (judgeChecker == 2)
                 {
                     Debug.Log("Good");
+                    ScoreAdder = ((int)(0.7f * currentEnergy));
                     Combo++;
                     Score = (int)(Score + (0.7f * currentEnergy));
                     Instantiate(GoodJudgeText, transform);
@@ -186,6 +191,7 @@ public class MoucePosition : MonoBehaviour
                 else if (judgeChecker == 1)
                 {
                     Debug.Log("Poor");
+                    ScoreAdder = ((int)(0.3f * currentEnergy));
                     Combo++;
                     Score = (int)(Score + (0.3f * currentEnergy));
                     Instantiate(PoorJudgeText, transform);
@@ -202,6 +208,7 @@ public class MoucePosition : MonoBehaviour
 
             ComboText.text = "Combo: " + Combo;
             ScoreText.text = "Score: " + Score;
+            ScoreAdderText.text = "+ " + ScoreAdder;
             judgeChecker = 0;
             yield return new WaitForSeconds(0.5f);
         }
