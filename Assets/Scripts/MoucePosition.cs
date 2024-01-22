@@ -25,11 +25,20 @@ public class MoucePosition : MonoBehaviour
     public Text ComboText;
     public Text ScoreText;
 
-    public float maxEnergy = 100.0f;
-    public float currentEnergy;
+    public int maxEnergy = 100;
+    public int currentEnergy;
 
     public RectTransform energyBar;
     public Text energyText;
+
+    public ParticleSystem lineParticle;
+    public ParticleSystem sparkParticle;
+    public ParticleSystem.MainModule lineParticleMain;
+    public ParticleSystem.MainModule sparkParticleMain;
+
+    public GameObject GreatJudgeText;
+    public GameObject GoodJudgeText;
+    public GameObject PoorJudgeText;
 
     #region LSL4Unity_inlet
     public string StreamName; // must be same with the OpenViBE streamname
@@ -39,7 +48,6 @@ public class MoucePosition : MonoBehaviour
 
     private float[,] data_buffer;
     private double[] timestamp_buffer;
-    float EEGpow = 1;
     bool isSatisfied = false;
     #endregion
 
@@ -49,7 +57,10 @@ public class MoucePosition : MonoBehaviour
         camera = GameObject.Find("Main Camera").GetComponent<Camera>();
         judgeObject.SetActive(false);
 
-        currentEnergy = maxEnergy / 2;
+        currentEnergy = (maxEnergy / 2);
+
+        lineParticleMain = lineParticle.main;
+        sparkParticleMain = sparkParticle.main;
 
         StartCoroutine(JudgementChecker());
     }
@@ -76,10 +87,8 @@ public class MoucePosition : MonoBehaviour
             int samples_returned = inlet.pull_chunk(data_buffer, timestamp_buffer);
             if (samples_returned > 0)
             {
-                float x = data_buffer[samples_returned - 1, 0];
-
-                Debug.Log(x);
-                EEGpow = x;
+                float x = data_buffer[samples_returned - 1, 0] * 10;
+                currentEnergy = (int)x;
             }
         }
         #endregion
@@ -104,8 +113,17 @@ public class MoucePosition : MonoBehaviour
             currentEnergy = maxEnergy;
         }
 
-        energyBar.localScale = new Vector3(currentEnergy / maxEnergy, 0.5f, 1);
-        energyText.text = "Current Power: " + EEGpow.ToString();
+        energyBar.localScale = new Vector3((currentEnergy / (maxEnergy * 1.0f)), 1, 1);
+        energyText.text = "X " + currentEnergy.ToString() + "%";
+
+        float temp = ((currentEnergy / (maxEnergy * 1.0f)) * 4.0f);
+
+        if (temp <= 1.0f)
+        {
+            temp = 1.0f;
+        }
+        lineParticleMain.startSize = new ParticleSystem.MinMaxCurve(0.25f * temp, 0.25f * temp);
+        sparkParticleMain.startSize = new ParticleSystem.MinMaxCurve(0.25f * temp, 0.25f * temp);
     }
 
     IEnumerator JudgementChecker()
@@ -151,21 +169,25 @@ public class MoucePosition : MonoBehaviour
                 Debug.Log(judgeChecker);
                 if (judgeChecker == 3)
                 {
+                    
                     Debug.Log("Great");
                     Combo++;
-                    Score = (int)(Score + (10000 * (currentEnergy / maxEnergy)));
+                    Score = (int)(Score + (1.0f * currentEnergy));
+                    Instantiate(GreatJudgeText, transform);
                 }
                 else if (judgeChecker == 2)
                 {
                     Debug.Log("Good");
                     Combo++;
-                    Score = (int)(Score + (7000 * (currentEnergy / maxEnergy)));
+                    Score = (int)(Score + (0.7f * currentEnergy));
+                    Instantiate(GoodJudgeText, transform);
                 }
                 else if (judgeChecker == 1)
                 {
                     Debug.Log("Poor");
                     Combo++;
-                    Score = (int)(Score + (3000 * (currentEnergy / maxEnergy)));
+                    Score = (int)(Score + (0.3f * currentEnergy));
+                    Instantiate(PoorJudgeText, transform);
 
                 }
                 else if (judgeChecker == 0)
@@ -179,9 +201,8 @@ public class MoucePosition : MonoBehaviour
             ComboText.text = "Combo: " + Combo;
             ScoreText.text = "Score: " + Score;
             judgeChecker = 0;
-            yield return new WaitForSeconds(0.3f);
+            yield return new WaitForSeconds(0.5f);
         }
-        yield return null;
     }
 
     IEnumerator ResolveExpectedStream()
