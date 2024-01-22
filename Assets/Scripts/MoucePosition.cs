@@ -39,6 +39,7 @@ public class MoucePosition : MonoBehaviour
     public GameObject GreatJudgeText;
     public GameObject GoodJudgeText;
     public GameObject PoorJudgeText;
+    public GameObject MissJudgeText;
 
     #region LSL4Unity_inlet
     public string StreamName; // must be same with the OpenViBE streamname
@@ -194,6 +195,7 @@ public class MoucePosition : MonoBehaviour
                 {
                     Debug.Log("Miss");
                     Combo = 0;
+                    Instantiate(MissJudgeText, transform);
                 }
             }
 
